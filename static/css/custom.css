@@ -1,0 +1,30 @@
+.module-card.active {
+    border: 1px solid #3b82f6;
+    background: rgba(59, 130, 246, 0.1);
+    box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.3);
+}
+.quiz-option {
+    transition: background 0.15s;
+}
+.quiz-option:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+pre {
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background: #0f172a;
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border-left: 4px solid #3b82f6;
+}
+::-webkit-scrollbar {
+    width: 8px;
+}
+::-webkit-scrollbar-track {
+    background: #1e1e2f;
+}
+::-webkit-scrollbar-thumb {
+    background: #3b82f6;
+    border-radius: 10px;
+}

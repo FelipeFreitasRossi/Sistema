@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-16 glass-card rounded-2xl p-8 shadow-2xl animate-fade-in">
+    <div class="text-center">
+        <i class="fas fa-code text-5xl text-blue-400 mb-4"></i>
+        <h1 class="text-4xl font-bold gradient-text mb-2">PythonLab</h1>
+        <p class="text-gray-300 mb-6">Acesse sua conta ou cadastre-se</p>
+    </div>
+
+    <div class="flex border-b border-gray-700 mb-6">
+        <button id="tabLogin" class="flex-1 py-2 text-center font-semibold text-blue-400 border-b-2 border-blue-400">Login</button>
+        <button id="tabCadastro" class="flex-1 py-2 text-center font-semibold text-gray-400 hover:text-gray-200">Cadastro</button>
+    </div>
+
+    <div id="loginForm" class="space-y-4">
+        <div><label class="block text-gray-300 mb-1">E-mail</label><input type="email" id="loginEmail" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:ring-2 focus:ring-blue-500"></div>
+        <div><label class="block text-gray-300 mb-1">Senha</label><input type="password" id="loginSenha" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:ring-2 focus:ring-blue-500"></div>
+        <button id="btnLogin" class="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold py-3 rounded-xl transition-all transform hover:scale-105 shadow-lg">Entrar</button>
+    </div>
+
+    <div id="cadastroForm" class="space-y-4 hidden">
+        <div><label class="block text-gray-300 mb-1">Nome completo</label><input type="text" id="cadastroNome" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white"></div>
+        <div><label class="block text-gray-300 mb-1">E-mail</label><input type="email" id="cadastroEmail" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white"></div>
+        <div><label class="block text-gray-300 mb-1">CPF</label><input type="text" id="cadastroCpf" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white" placeholder="000.000.000-00" maxlength="14"></div>
+        <div><label class="block text-gray-300 mb-1">Data de nascimento</label><input type="date" id="cadastroDataNasc" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white"></div>
+        <div><label class="block text-gray-300 mb-1">Senha</label><input type="password" id="cadastroSenha" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white" placeholder="Mínimo 6 caracteres"></div>
+        <button id="btnCadastro" class="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold py-3 rounded-xl transition-all transform hover:scale-105 shadow-lg">Cadastrar</button>
+    </div>
+
+    <div id="errorMsg" class="text-red-400 text-sm text-center mt-4 hidden"></div>
+</div>
+
+<script>
+    // Máscara CPF
+    const cpfInput = document.getElementById('cadastroCpf');
+    if(cpfInput) {
+        cpfInput.addEventListener('input', function(e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.slice(0,11);
+            if (value.length > 9) value = value.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+            else if (value.length > 6) value = value.replace(/(\d{3})(\d{3})(\d{3})/, '$1.$2.$3');
+            else if (value.length > 3) value = value.replace(/(\d{3})(\d{3})/, '$1.$2');
+            else if (value.length > 0) value = value.replace(/(\d{3})/, '$1');
+            e.target.value = value;
+        });
+    }
+
+    const tabLogin = document.getElementById('tabLogin');
+    const tabCadastro = document.getElementById('tabCadastro');
+    const loginDiv = document.getElementById('loginForm');
+    const cadastroDiv = document.getElementById('cadastroForm');
+    const errorDiv = document.getElementById('errorMsg');
+
+    tabLogin.addEventListener('click', () => {
+        tabLogin.classList.add('text-blue-400', 'border-blue-400');
+        tabLogin.classList.remove('text-gray-400');
+        tabCadastro.classList.remove('text-blue-400', 'border-blue-400');
+        tabCadastro.classList.add('text-gray-400');
+        loginDiv.classList.remove('hidden');
+        cadastroDiv.classList.add('hidden');
+        errorDiv.classList.add('hidden');
+    });
+    tabCadastro.addEventListener('click', () => {
+        tabCadastro.classList.add('text-blue-400', 'border-blue-400');
+        tabCadastro.classList.remove('text-gray-400');
+        tabLogin.classList.remove('text-blue-400', 'border-blue-400');
+        tabLogin.classList.add('text-gray-400');
+        cadastroDiv.classList.remove('hidden');
+        loginDiv.classList.add('hidden');
+        errorDiv.classList.add('hidden');
+    });
+</script>
+
+<style>
+    @keyframes fade-in { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+    .animate-fade-in { animation: fade-in 0.6s ease-out; }
+</style>
+{% endblock %}

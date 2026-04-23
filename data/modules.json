@@ -1,0 +1,62 @@
+[
+    {
+        "id": 0,
+        "title": "🐍 Introdução ao Python",
+        "summary": "Sintaxe, primeiro programa e boas práticas.",
+        "lesson": "<h2 class='text-2xl font-bold gradient-text mb-3'>Bem-vindo ao Python!</h2><p>Python é uma linguagem de alto nível, interpretada e com sintaxe limpa. Vamos começar com o clássico <strong>Olá, Mundo!</strong></p><div class='code-block'><pre># Isso é um comentário\nprint('Olá, mundo!')\nprint('Aprendendo Python com PythonLab')</pre></div><p>💡 <strong>Dica:</strong> Use <code>print()</code> para exibir mensagens. Tente modificar o texto e veja o resultado (no futuro você executará código real).</p><div class='bg-blue-900/20 p-3 rounded-lg mt-3'><i class='fas fa-lightbulb text-yellow-400 mr-2'></i> Desafio: Escreva um programa que mostre seu nome e idade usando print().</div>",
+        "quiz": {
+            "question": "Qual função exibe texto no terminal?",
+            "options": ["console.log()", "echo()", "print()", "printf()"],
+            "correct": 2,
+            "explanation": "Em Python, usamos print('texto') para exibir mensagens na tela."
+        }
+    },
+    {
+        "id": 1,
+        "title": "📦 Variáveis e Tipos de Dados",
+        "summary": "int, float, str, bool – como armazenar informações.",
+        "lesson": "<h2 class='text-2xl font-bold gradient-text mb-3'>Variáveis: caixas para seus dados</h2><p>Python infere o tipo automaticamente. Veja exemplos:</p><div class='code-block'><pre># Números inteiros\nidade = 25\n# Números decimais (float)\naltura = 1.75\n# Texto (string)\nnome = 'Ana'\n# Verdadeiro/Falso (bool)\nestudante = True\n\nprint(type(idade))   # <class 'int'>\nprint(type(altura))  # <class 'float'></pre></div><p>🔧 <strong>Regras para nomes de variáveis:</strong> não pode começar com número, sem espaços, case sensitive.</p><div class='bg-blue-900/20 p-3 rounded-lg mt-3'><i class='fas fa-code-branch text-green-400 mr-2'></i> Exercício: Crie variáveis para seu nome, idade e cidade. Exiba tudo com print().</div>",
+        "quiz": {
+            "question": "Qual é o tipo da variável 'preco = 19.99' ?",
+            "options": ["int", "float", "str", "bool"],
+            "correct": 1,
+            "explanation": "Números com ponto decimal são do tipo float (ponto flutuante)."
+        }
+    },
+    {
+        "id": 2,
+        "title": "⚡ Condicionais (if/elif/else)",
+        "summary": "Controle de fluxo – decisões no código.",
+        "lesson": "<h2 class='text-2xl font-bold gradient-text mb-3'>Tomando decisões com if/else</h2><p>As condicionais permitem executar blocos diferentes conforme uma condição.</p><div class='code-block'><pre>nota = 85\nif nota >= 60:\n    print('Aprovado')\nelse:\n    print('Reprovado')\n\n# Com elif (else if)\nidade = 17\nif idade < 12:\n    print('Criança')\nelif idade < 18:\n    print('Adolescente')\nelse:\n    print('Adulto')</pre></div><p>⚠️ <strong>Indentação é obrigatória!</strong> Use 4 espaços.</p><div class='bg-blue-900/20 p-3 rounded-lg mt-3'><i class='fas fa-gamepad text-purple-400 mr-2'></i> Mini projeto: Peça um número ao usuário e diga se é positivo, negativo ou zero.</div>",
+        "quiz": {
+            "question": "Qual palavra-chave inicia uma condicional em Python?",
+            "options": ["switch", "if", "when", "cond"],
+            "correct": 1,
+            "explanation": "A estrutura condicional começa com 'if', seguida da condição e dois pontos."
+        }
+    },
+    {
+        "id": 3,
+        "title": "🔄 Laços de Repetição (for/while)",
+        "summary": "Iterações – execute código várias vezes.",
+        "lesson": "<h2 class='text-2xl font-bold gradient-text mb-3'>Repetindo ações com loops</h2><p><strong>for</strong> é usado para iterar sobre sequências. <strong>while</strong> repete enquanto a condição for verdadeira.</p><div class='code-block'><pre># for com range\nfor i in range(5):\n    print(f'Iteração {i}')\n\n# while\ncontador = 0\nwhile contador < 3:\n    print('Python é legal!')\n    contador += 1</pre></div><p>📌 <strong>Cuidado com loop infinito!</strong> Sempre atualize a variável de controle no while.</p><div class='bg-blue-900/20 p-3 rounded-lg mt-3'><i class='fas fa-calculator text-green-400 mr-2'></i> Desafio: Some os números de 1 a 100 usando while ou for.</div>",
+        "quiz": {
+            "question": "Quantas vezes o bloco será executado: for x in range(4): print(x)",
+            "options": ["3 vezes", "4 vezes", "5 vezes", "infinito"],
+            "correct": 1,
+            "explanation": "range(4) gera 0,1,2,3 → 4 iterações."
+        }
+    },
+    {
+        "id": 4,
+        "title": "⚙️ Funções e Reuso",
+        "summary": "Defina blocos de código reutilizáveis.",
+        "lesson": "<h2 class='text-2xl font-bold gradient-text mb-3'>Funções: organizando seu código</h2><p>Use <strong>def</strong> para criar funções. Elas podem receber parâmetros e retornar valores.</p><div class='code-block'><pre>def saudacao(nome):\n    return f'Olá, {nome}! Seja bem-vindo.'\n\nmensagem = saudacao('Maria')\nprint(mensagem)\n\ndef soma(a, b):\n    return a + b\n\nresultado = soma(10, 5)\nprint(resultado)  # 15</pre></div><p>🎯 <strong>Boas práticas:</strong> funções devem ter nomes claros e fazer uma única tarefa.</p><div class='bg-blue-900/20 p-3 rounded-lg mt-3'><i class='fas fa-tasks text-yellow-400 mr-2'></i> Exercício: Crie uma função que receba dois números e retorne a multiplicação.</div>",
+        "quiz": {
+            "question": "Qual palavra define uma função em Python?",
+            "options": ["function", "def", "fun", "define"],
+            "correct": 1,
+            "explanation": "A palavra-chave 'def' é usada para definir funções."
+        }
+    }
+]

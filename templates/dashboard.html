@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex flex-wrap justify-between items-center mb-8 glass-card rounded-2xl p-5">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-graduation-cap text-3xl text-blue-400"></i>
+            <h1 class="text-2xl font-bold text-white">Olá, <span class="gradient-text">{{ user }}</span>!</h1>
+        </div>
+        <div class="flex items-center space-x-4 bg-gray-800/50 px-4 py-2 rounded-full">
+            <i class="fas fa-chart-line text-blue-300"></i>
+            <div class="w-32 bg-gray-700 rounded-full h-2">
+                <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full w-0 transition-all duration-500"></div>
+            </div>
+            <span id="progressPercent" class="text-white text-sm">0%</span>
+        </div>
+    </div>
+
+    <div class="relative rounded-2xl overflow-hidden mb-8 h-48 shadow-xl">
+        <img src="https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=1200&h=300&fit=crop" class="w-full h-full object-cover" alt="Python coding">
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-cyan-900/40 flex items-center">
+            <h2 class="text-3xl md:text-4xl font-bold text-white ml-8 drop-shadow-lg">🐍 Domine Python com a gente</h2>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10" id="modulesGrid">
+        {% for module in modules %}
+        <div data-id="{{ module.id }}" class="module-card glass-card rounded-xl p-5 cursor-pointer transition-all hover:scale-105 hover:border-blue-500 border border-transparent">
+            <div class="flex justify-between items-start">
+                <i class="fab fa-python text-3xl text-blue-400"></i>
+                <span class="module-badge text-xs bg-gray-800 px-2 py-1 rounded-full">📘 Pendente</span>
+            </div>
+            <h3 class="text-xl font-bold text-white mt-3">{{ module.title }}</h3>
+            <p class="text-gray-400 text-sm mt-2">{{ module.summary }}</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div id="teachingArea" class="glass-card rounded-2xl p-6 hidden"></div>
+</div>
+{% endblock %}
