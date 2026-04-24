@@ -12,12 +12,10 @@ class Usuario(db.Model):
     senha_hash = db.Column(db.String(200), nullable=False)
     data_nascimento = db.Column(db.Date, nullable=False)
     data_cadastro = db.Column(db.DateTime, default=datetime.utcnow)
+    payment_status = db.Column(db.String(20), default='pending')
 
     def set_senha(self, senha):
         self.senha_hash = generate_password_hash(senha)
 
     def verificar_senha(self, senha):
         return check_password_hash(self.senha_hash, senha)
-
-    def __repr__(self):
-        return f'<Usuario {self.nome}>'

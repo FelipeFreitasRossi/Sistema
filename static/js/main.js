@@ -1,110 +1,33 @@
+let modules = [];
+let currentModuleId = 0;
+let userProgress = {};
+
 document.addEventListener('DOMContentLoaded', function() {
-    // ==================== TELA DE ACESSO (INDEX) ====================
-    const btnLogin = document.getElementById('btnLogin');
-    const btnCadastro = document.getElementById('btnCadastro');
-
-    if (btnLogin) {
-        btnLogin.addEventListener('click', async () => {
-            const email = document.getElementById('loginEmail').value.trim();
-            const senha = document.getElementById('loginSenha').value;
-            const errorDiv = document.getElementById('errorMsg');
-
-            if (!email || !senha) {
-                errorDiv.innerText = 'Preencha e-mail e senha.';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-            try {
-                const res = await fetch('/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, senha })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    window.location.href = data.redirect;
-                } else {
-                    errorDiv.innerText = data.message;
-                    errorDiv.classList.remove('hidden');
-                }
-            } catch (err) {
-                errorDiv.innerText = 'Erro de conexão.';
-                errorDiv.classList.remove('hidden');
-            }
-        });
-    }
-
-    if (btnCadastro) {
-        btnCadastro.addEventListener('click', async () => {
-            const nome = document.getElementById('cadastroNome').value.trim();
-            const email = document.getElementById('cadastroEmail').value.trim();
-            const cpf = document.getElementById('cadastroCpf').value.replace(/\D/g, '');
-            const dataNascimento = document.getElementById('cadastroDataNasc').value;
-            const senha = document.getElementById('cadastroSenha').value;
-            const errorDiv = document.getElementById('errorMsg');
-
-            if (!nome || !email || !cpf || !dataNascimento || !senha) {
-                errorDiv.innerText = 'Todos os campos são obrigatórios.';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-            if (senha.length < 6) {
-                errorDiv.innerText = 'A senha deve ter pelo menos 6 caracteres.';
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-            try {
-                const res = await fetch('/cadastrar', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ nome, email, cpf, data_nascimento: dataNascimento, senha })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    window.location.href = data.redirect;
-                } else {
-                    errorDiv.innerText = data.message;
-                    errorDiv.classList.remove('hidden');
-                }
-            } catch (err) {
-                errorDiv.innerText = 'Erro de conexão com o servidor.';
-                errorDiv.classList.remove('hidden');
-            }
-        });
-    }
-
-    // ==================== DASHBOARD ====================
     if (document.getElementById('modulesGrid')) {
         carregarDashboard();
     }
 });
 
-// Variáveis globais do dashboard
-let modules = [];
-let currentModuleId = 0;
-let userProgress = {};
-
 async function carregarDashboard() {
     try {
-        const modulesRes = await fetch('/api/modules');
-        modules = await modulesRes.json();
-        const progressRes = await fetch('/api/progress');
-        if (progressRes.ok) userProgress = await progressRes.json();
-        else userProgress = {};
+        const resMod = await fetch('/api/modules');
+        modules = await resMod.json();
+        const resProg = await fetch('/api/progress');
+        if (resProg.ok) userProgress = await resProg.json();
         renderModulesGrid();
         updateProgressUI();
         updateModuleBadges();
         const primeiroNaoConcluido = modules.find(m => !userProgress[m.id]);
         currentModuleId = primeiroNaoConcluido ? primeiroNaoConcluido.id : modules[0].id;
         loadModule(currentModuleId);
-    } catch (err) {
-        console.error(err);
-        document.getElementById('teachingArea').innerHTML = '<div class="text-red-400 text-center p-8">Erro ao carregar conteúdo.</div>';
+    } catch(e) {
+        document.getElementById('teachingArea').innerHTML = '<div class="text-red-400 p-8">Erro ao carregar.</div>';
     }
 }
 
 function renderModulesGrid() {
     const grid = document.getElementById('modulesGrid');
+    if (!grid) return;
     grid.innerHTML = '';
     modules.forEach(mod => {
         const card = document.createElement('div');
@@ -132,20 +55,10 @@ async function loadModule(moduleId) {
     if (!mod) return;
     const alreadyDone = userProgress[moduleId] === true;
     const savedAnswer = localStorage.getItem(`quiz_${moduleId}`);
-    let quizHtml = `
-        <div class="mt-6 border-t border-gray-700 pt-6">
-            <h3 class="text-xl font-semibold text-white mb-3"><i class="fas fa-question-circle text-blue-400 mr-2"></i>Quiz</h3>
-            <p class="text-gray-200 mb-3">${mod.quiz.question}</p>
-            <div class="space-y-2" id="quizOptions">
-    `;
+    let quizHtml = `<div class="mt-6 border-t border-gray-700 pt-6"><h3 class="text-xl font-semibold text-white mb-3"><i class="fas fa-question-circle text-blue-400 mr-2"></i>Quiz</h3><p class="text-gray-200 mb-3">${mod.quiz.question}</p><div class="space-y-2" id="quizOptions">`;
     mod.quiz.options.forEach((opt, idx) => {
         const checked = (savedAnswer == idx) ? 'checked' : '';
-        quizHtml += `
-            <label class="flex items-center space-x-3 bg-gray-800 p-2 rounded-lg cursor-pointer quiz-option">
-                <input type="radio" name="quiz" value="${idx}" ${checked} ${alreadyDone ? 'disabled' : ''}>
-                <span class="text-gray-300">${opt}</span>
-            </label>
-        `;
+        quizHtml += `<label class="flex items-center space-x-3 bg-gray-800 p-2 rounded-lg cursor-pointer quiz-option"><input type="radio" name="quiz" value="${idx}" ${checked} ${alreadyDone ? 'disabled' : ''}><span class="text-gray-300">${opt}</span></label>`;
     });
     quizHtml += `</div><div id="quizFeedback" class="mt-3 text-sm"></div>`;
     if (!alreadyDone) {
@@ -155,48 +68,35 @@ async function loadModule(moduleId) {
         quizHtml += `<div class="mt-3 p-3 rounded-lg ${isCorrect ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'}"><i class="fas ${isCorrect ? 'fa-check-circle' : 'fa-times-circle'} mr-2"></i>${mod.quiz.explanation}</div>`;
     }
     quizHtml += `</div>`;
-    const fullHtml = `
-        <div class="prose prose-invert max-w-none">
-            <h2 class="text-2xl font-bold gradient-text">${mod.title}</h2>
-            <div class="mt-4 text-gray-200 leading-relaxed">${mod.lesson}</div>
-        </div>
-        ${quizHtml}
-    `;
-    const teachingArea = document.getElementById('teachingArea');
-    teachingArea.innerHTML = fullHtml;
-    teachingArea.classList.remove('hidden');
+    const fullHtml = `<div class="prose prose-invert max-w-none"><h2 class="text-2xl font-bold gradient-text">${mod.title}</h2><div class="mt-4 text-gray-200 leading-relaxed">${mod.lesson}</div></div>${quizHtml}`;
+    const area = document.getElementById('teachingArea');
+    area.innerHTML = fullHtml;
+    area.classList.remove('hidden');
     if (!alreadyDone) {
-        const submitBtn = document.getElementById('submitQuiz');
-        if (submitBtn) {
-            submitBtn.addEventListener('click', async () => {
-                const selected = document.querySelector('input[name="quiz"]:checked');
-                if (!selected) {
-                    document.getElementById('quizFeedback').innerHTML = '<span class="text-yellow-400">Selecione uma opção!</span>';
-                    return;
-                }
-                const chosen = parseInt(selected.value);
-                try {
-                    const res = await fetch('/api/submit-quiz', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ module_id: moduleId, selected_option: chosen })
-                    });
-                    const data = await res.json();
-                    if (data.correct) {
-                        document.getElementById('quizFeedback').innerHTML = `<span class="text-green-400">${data.explanation}</span>`;
-                        userProgress = data.progress;
-                        updateProgressUI();
-                        updateModuleBadges();
-                        localStorage.setItem(`quiz_${moduleId}`, chosen);
-                        loadModule(moduleId);
-                    } else {
-                        document.getElementById('quizFeedback').innerHTML = `<span class="text-red-400">${data.explanation}</span>`;
-                    }
-                } catch (err) {
-                    document.getElementById('quizFeedback').innerHTML = '<span class="text-red-400">Erro ao enviar resposta.</span>';
-                }
+        document.getElementById('submitQuiz').addEventListener('click', async () => {
+            const selected = document.querySelector('input[name="quiz"]:checked');
+            if (!selected) {
+                document.getElementById('quizFeedback').innerHTML = '<span class="text-yellow-400">Selecione uma opção!</span>';
+                return;
+            }
+            const chosen = parseInt(selected.value);
+            const res = await fetch('/api/submit-quiz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ module_id: moduleId, selected_option: chosen })
             });
-        }
+            const data = await res.json();
+            if (data.correct) {
+                document.getElementById('quizFeedback').innerHTML = `<span class="text-green-400">${data.explanation}</span>`;
+                userProgress = data.progress;
+                updateProgressUI();
+                updateModuleBadges();
+                localStorage.setItem(`quiz_${moduleId}`, chosen);
+                loadModule(moduleId);
+            } else {
+                document.getElementById('quizFeedback').innerHTML = `<span class="text-red-400">${data.explanation}</span>`;
+            }
+        });
     }
 }
 
@@ -204,10 +104,10 @@ function updateProgressUI() {
     const total = modules.length;
     const completed = Object.values(userProgress).filter(v => v === true).length;
     const percent = total ? Math.round((completed / total) * 100) : 0;
-    const progressBar = document.getElementById('progressBar');
-    const progressPercent = document.getElementById('progressPercent');
-    if (progressBar) progressBar.style.width = `${percent}%`;
-    if (progressPercent) progressPercent.innerText = `${percent}%`;
+    const bar = document.getElementById('progressBar');
+    const txt = document.getElementById('progressPercent');
+    if (bar) bar.style.width = `${percent}%`;
+    if (txt) txt.innerText = `${percent}%`;
 }
 
 function updateModuleBadges() {

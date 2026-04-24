@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-16 glass-card rounded-2xl p-8">
+    <h1 class="text-3xl font-bold gradient-text text-center mb-6">Entrar na sua conta</h1>
+    <div>
+        <input type="email" id="email" placeholder="E-mail" class="w-full mb-3 px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white">
+        <input type="password" id="senha" placeholder="Senha" class="w-full mb-3 px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white">
+        <button id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-700 py-3 rounded-xl text-white">Entrar</button>
+        <div id="errorMsg" class="text-red-400 text-sm text-center mt-3 hidden"></div>
+    </div>
+</div>
+<script>
+    document.getElementById('btnLogin').addEventListener('click', async () => {
+        const email = document.getElementById('email').value;
+        const senha = document.getElementById('senha').value;
+        const res = await fetch('/logar', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({email, senha})
+        });
+        const data = await res.json();
+        if (data.success) window.location.href = data.redirect;
+        else {
+            document.getElementById('errorMsg').innerText = data.message;
+            document.getElementById('errorMsg').classList.remove('hidden');
+        }
+    });
+</script>
+{% endblock %}

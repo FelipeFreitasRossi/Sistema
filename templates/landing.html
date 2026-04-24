@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero -->
+<section class="relative rounded-2xl overflow-hidden mb-12">
+    <div class="absolute inset-0 bg-gradient-to-r from-blue-900/90 to-cyan-900/90 z-10"></div>
+    <img src="https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=1600&h=600&fit=crop" 
+         class="w-full h-96 object-cover" alt="Python coding">
+    <div class="relative z-20 flex flex-col justify-center items-center text-center h-96 px-4">
+        <h1 class="text-5xl md:text-6xl font-bold text-white mb-4">🐍 Domine Python</h1>
+        <p class="text-xl text-gray-200 max-w-2xl mb-8">Curso completo para iniciantes com 5 módulos interativos, quizzes e certificado de conclusão.</p>
+        <a href="{{ url_for('checkout') }}" class="bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold py-4 px-8 rounded-full text-lg transition-all transform hover:scale-105 shadow-xl">
+            Comprar agora por R$ 19,99
+        </a>
+    </div>
+</section>
+
+<!-- Benefícios -->
+<section class="mb-16">
+    <h2 class="text-3xl font-bold text-center gradient-text mb-10">Por que escolher nosso curso?</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div class="glass-card rounded-xl p-6 text-center">
+            <i class="fas fa-laptop-code text-5xl text-blue-400 mb-4"></i>
+            <h3 class="text-xl font-bold text-white mb-2">Aprenda na prática</h3>
+            <p class="text-gray-300">Lições interativas com exemplos reais e desafios de código.</p>
+        </div>
+        <div class="glass-card rounded-xl p-6 text-center">
+            <i class="fas fa-gamepad text-5xl text-blue-400 mb-4"></i>
+            <h3 class="text-xl font-bold text-white mb-2">Quizzes divertidos</h3>
+            <p class="text-gray-300">Teste seus conhecimentos e acompanhe seu progresso.</p>
+        </div>
+        <div class="glass-card rounded-xl p-6 text-center">
+            <i class="fas fa-trophy text-5xl text-blue-400 mb-4"></i>
+            <h3 class="text-xl font-bold text-white mb-2">Certificado</h3>
+            <p class="text-gray-300">Ao concluir todos os módulos, você recebe um certificado.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Módulos -->
+<section class="mb-16">
+    <h2 class="text-3xl font-bold text-center gradient-text mb-10">O que você vai aprender</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-gray-800/50 rounded-xl p-5 flex items-start space-x-4">
+            <i class="fas fa-check-circle text-green-400 text-2xl mt-1"></i>
+            <div><h3 class="text-xl font-semibold text-white">Introdução ao Python</h3><p class="text-gray-300">Sintaxe, primeiro programa, tipos de dados básicos.</p></div>
+        </div>
+        <div class="bg-gray-800/50 rounded-xl p-5 flex items-start space-x-4">
+            <i class="fas fa-check-circle text-green-400 text-2xl mt-1"></i>
+            <div><h3 class="text-xl font-semibold text-white">Variáveis e Tipos</h3><p class="text-gray-300">int, float, str, bool e operações básicas.</p></div>
+        </div>
+        <div class="bg-gray-800/50 rounded-xl p-5 flex items-start space-x-4">
+            <i class="fas fa-check-circle text-green-400 text-2xl mt-1"></i>
+            <div><h3 class="text-xl font-semibold text-white">Condicionais (if/else)</h3><p class="text-gray-300">Controle de fluxo e tomada de decisões.</p></div>
+        </div>
+        <div class="bg-gray-800/50 rounded-xl p-5 flex items-start space-x-4">
+            <i class="fas fa-check-circle text-green-400 text-2xl mt-1"></i>
+            <div><h3 class="text-xl font-semibold text-white">Laços de repetição</h3><p class="text-gray-300">for e while para iterar dados.</p></div>
+        </div>
+        <div class="bg-gray-800/50 rounded-xl p-5 flex items-start space-x-4">
+            <i class="fas fa-check-circle text-green-400 text-2xl mt-1"></i>
+            <div><h3 class="text-xl font-semibold text-white">Funções</h3><p class="text-gray-300">Crie blocos reutilizáveis com def e return.</p></div>
+        </div>
+        <div class="bg-gray-800/50 rounded-xl p-5 flex items-start space-x-4">
+            <i class="fas fa-check-circle text-green-400 text-2xl mt-1"></i>
+            <div><h3 class="text-xl font-semibold text-white">Bônus: Projeto Final</h3><p class="text-gray-300">Aplique tudo em um mini sistema de tarefas.</p></div>
+        </div>
+    </div>
+</section>
+
+<!-- Depoimento -->
+<section class="glass-card rounded-2xl p-8 mb-16 text-center">
+    <i class="fas fa-quote-left text-4xl text-blue-400 mb-4"></i>
+    <p class="text-xl text-gray-200 italic max-w-3xl mx-auto">"Nunca programei antes e em duas semanas já estou criando meus próprios scripts! O método prático e os quizzes me ajudaram muito."</p>
+    <p class="text-white font-bold mt-4">— Ana Silva, aluna aprovada</p>
+</section>
+
+<!-- Chamada final -->
+<section class="text-center mb-8">
+    <h2 class="text-3xl font-bold text-white mb-4">Comece sua jornada hoje mesmo!</h2>
+    <p class="text-gray-300 mb-6">Acesso vitalício por apenas R$ 19,99</p>
+    <a href="{{ url_for('checkout') }}" class="inline-block bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-bold py-4 px-10 rounded-full text-xl transition-all transform hover:scale-105 shadow-xl">
+        Quero aprender Python! 🚀
+    </a>
+</section>
+{% endblock %}
