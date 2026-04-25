@@ -9,10 +9,10 @@
         </div>
         <div class="flex items-center space-x-4 bg-gray-800/50 px-4 py-2 rounded-full">
             <i class="fas fa-chart-line text-blue-300"></i>
-            <div class="w-32 bg-gray-700 rounded-full h-2">
-                <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full w-0 transition-all duration-500"></div>
+            <div class="w-32 bg-gray-700 rounded-full h-2 overflow-hidden">
+                <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-cyan-400 h-2 rounded-full w-0 transition-all duration-700"></div>
             </div>
-            <span id="progressPercent" class="text-white text-sm">0%</span>
+            <span id="progressPercent" class="text-white text-sm font-mono">0%</span>
         </div>
     </div>
 
@@ -38,4 +38,14 @@
 
     <div id="teachingArea" class="glass-card rounded-2xl p-6 hidden"></div>
 </div>
+
+<script>
+    // Inicializa animações do dashboard quando a página carregar
+    document.addEventListener('DOMContentLoaded', () => {
+        gsap.fromTo('.max-w-6xl', 
+            { opacity: 0, y: 20 },
+            { opacity: 1, y: 0, duration: 0.6, delay: 0.1 }
+        );
+    });
+</script>
 {% endblock %}

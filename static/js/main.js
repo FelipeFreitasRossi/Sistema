@@ -1,13 +1,24 @@
+// Registra GSAP e ScrollTrigger
+gsap.registerPlugin(ScrollTrigger);
+
+// Variáveis globais
 let modules = [];
 let currentModuleId = 0;
 let userProgress = {};
 
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.getElementById('modulesGrid')) {
-        carregarDashboard();
-    }
-});
+// Função auxiliar para mostrar toast
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    const toast = document.createElement('div');
+    const icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+    toast.className = `toast glass-card rounded-lg p-3 mb-2 flex items-center gap-2 text-${type === 'success' ? 'green' : (type === 'error' ? 'red' : 'blue')}-400`;
+    toast.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 4000);
+}
 
+// Carregar dashboard
 async function carregarDashboard() {
     try {
         const resMod = await fetch('/api/modules');
@@ -20,8 +31,13 @@ async function carregarDashboard() {
         const primeiroNaoConcluido = modules.find(m => !userProgress[m.id]);
         currentModuleId = primeiroNaoConcluido ? primeiroNaoConcluido.id : modules[0].id;
         loadModule(currentModuleId);
+        // Animação de entrada dos cards
+        gsap.fromTo('.module-card', 
+            { opacity: 0, scale: 0.9 },
+            { opacity: 1, scale: 1, duration: 0.5, stagger: 0.1, scrollTrigger: { trigger: '#modulesGrid', start: 'top 80%' } }
+        );
     } catch(e) {
-        document.getElementById('teachingArea').innerHTML = '<div class="text-red-400 p-8">Erro ao carregar.</div>';
+        document.getElementById('teachingArea').innerHTML = '<div class="text-red-400 p-8 text-center">Erro ao carregar módulos. Recarregue a página.</div>';
     }
 }
 
@@ -42,6 +58,8 @@ function renderModulesGrid() {
             <p class="text-gray-400 text-sm mt-2">${mod.summary}</p>
         `;
         card.addEventListener('click', () => {
+            // Animação de clique
+            gsap.to(card, { scale: 0.98, duration: 0.1, yoyo: true, repeat: 1 });
             currentModuleId = mod.id;
             renderModulesGrid();
             loadModule(currentModuleId);
@@ -58,11 +76,11 @@ async function loadModule(moduleId) {
     let quizHtml = `<div class="mt-6 border-t border-gray-700 pt-6"><h3 class="text-xl font-semibold text-white mb-3"><i class="fas fa-question-circle text-blue-400 mr-2"></i>Quiz</h3><p class="text-gray-200 mb-3">${mod.quiz.question}</p><div class="space-y-2" id="quizOptions">`;
     mod.quiz.options.forEach((opt, idx) => {
         const checked = (savedAnswer == idx) ? 'checked' : '';
-        quizHtml += `<label class="flex items-center space-x-3 bg-gray-800 p-2 rounded-lg cursor-pointer quiz-option"><input type="radio" name="quiz" value="${idx}" ${checked} ${alreadyDone ? 'disabled' : ''}><span class="text-gray-300">${opt}</span></label>`;
+        quizHtml += `<label class="flex items-center space-x-3 bg-gray-800 p-2 rounded-lg cursor-pointer quiz-option transition hover:bg-gray-700"><input type="radio" name="quiz" value="${idx}" ${checked} ${alreadyDone ? 'disabled' : ''}><span class="text-gray-300">${opt}</span></label>`;
     });
     quizHtml += `</div><div id="quizFeedback" class="mt-3 text-sm"></div>`;
     if (!alreadyDone) {
-        quizHtml += `<button id="submitQuiz" class="mt-4 bg-blue-600 hover:bg-blue-700 px-6 py-2 rounded-full text-white font-semibold transition"><i class="fas fa-check mr-2"></i>Responder</button>`;
+        quizHtml += `<button id="submitQuiz" class="mt-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 px-6 py-2 rounded-full text-white font-semibold transition transform hover:scale-105"><i class="fas fa-check mr-2"></i>Responder</button>`;
     } else {
         const isCorrect = (savedAnswer == mod.quiz.correct);
         quizHtml += `<div class="mt-3 p-3 rounded-lg ${isCorrect ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'}"><i class="fas ${isCorrect ? 'fa-check-circle' : 'fa-times-circle'} mr-2"></i>${mod.quiz.explanation}</div>`;
@@ -72,29 +90,47 @@ async function loadModule(moduleId) {
     const area = document.getElementById('teachingArea');
     area.innerHTML = fullHtml;
     area.classList.remove('hidden');
+    gsap.fromTo(area, { opacity: 0, y: 20 }, { opacity: 1, y: 0, duration: 0.5 });
+
     if (!alreadyDone) {
         document.getElementById('submitQuiz').addEventListener('click', async () => {
             const selected = document.querySelector('input[name="quiz"]:checked');
             if (!selected) {
-                document.getElementById('quizFeedback').innerHTML = '<span class="text-yellow-400">Selecione uma opção!</span>';
+                const fb = document.getElementById('quizFeedback');
+                fb.innerHTML = '<span class="text-yellow-400"><i class="fas fa-exclamation-triangle mr-1"></i>Selecione uma opção!</span>';
+                gsap.to(fb, { scale: 1.05, duration: 0.2, yoyo: true, repeat: 1 });
                 return;
             }
             const chosen = parseInt(selected.value);
-            const res = await fetch('/api/submit-quiz', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ module_id: moduleId, selected_option: chosen })
-            });
-            const data = await res.json();
-            if (data.correct) {
-                document.getElementById('quizFeedback').innerHTML = `<span class="text-green-400">${data.explanation}</span>`;
-                userProgress = data.progress;
-                updateProgressUI();
-                updateModuleBadges();
-                localStorage.setItem(`quiz_${moduleId}`, chosen);
-                loadModule(moduleId);
-            } else {
-                document.getElementById('quizFeedback').innerHTML = `<span class="text-red-400">${data.explanation}</span>`;
+            const btn = document.getElementById('submitQuiz');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Verificando...';
+            try {
+                const res = await fetch('/api/submit-quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ module_id: moduleId, selected_option: chosen })
+                });
+                const data = await res.json();
+                if (data.correct) {
+                    document.getElementById('quizFeedback').innerHTML = `<span class="text-green-400"><i class="fas fa-check-circle mr-1"></i>${data.explanation}</span>`;
+                    userProgress = data.progress;
+                    updateProgressUI();
+                    updateModuleBadges();
+                    localStorage.setItem(`quiz_${moduleId}`, chosen);
+                    showToast('✅ Resposta correta! Módulo concluído.', 'success');
+                    loadModule(moduleId);
+                } else {
+                    document.getElementById('quizFeedback').innerHTML = `<span class="text-red-400"><i class="fas fa-times-circle mr-1"></i>${data.explanation}</span>`;
+                    showToast('❌ Resposta errada. Tente novamente.', 'error');
+                    btn.disabled = false;
+                    btn.innerHTML = originalText;
+                }
+            } catch(e) {
+                document.getElementById('quizFeedback').innerHTML = '<span class="text-red-400">Erro ao enviar resposta.</span>';
+                btn.disabled = false;
+                btn.innerHTML = originalText;
             }
         });
     }
@@ -106,8 +142,13 @@ function updateProgressUI() {
     const percent = total ? Math.round((completed / total) * 100) : 0;
     const bar = document.getElementById('progressBar');
     const txt = document.getElementById('progressPercent');
-    if (bar) bar.style.width = `${percent}%`;
+    if (bar) {
+        gsap.to(bar, { width: `${percent}%`, duration: 0.8, ease: 'power2.out' });
+    }
     if (txt) txt.innerText = `${percent}%`;
+    if (percent === 100 && total > 0) {
+        showToast('🎉 Parabéns! Você concluiu todos os módulos!', 'success');
+    }
 }
 
 function updateModuleBadges() {
@@ -125,3 +166,10 @@ function updateModuleBadges() {
         }
     });
 }
+
+// Inicialização
+document.addEventListener('DOMContentLoaded', () => {
+    if (document.getElementById('modulesGrid')) {
+        carregarDashboard();
+    }
+});
