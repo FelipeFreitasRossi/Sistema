@@ -1,21 +1,22 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- Hero Section com animação -->
+<!-- Hero Section -->
 <section class="relative rounded-3xl overflow-hidden mb-20 min-h-[500px] flex items-center" id="hero">
     <div class="absolute inset-0 bg-gradient-to-r from-blue-900/80 to-cyan-900/70 z-10"></div>
     <img src="https://images.unsplash.com/photo-1526379095098-d400fd0bf935?w=1600&h=600&fit=crop" 
          class="absolute inset-0 w-full h-full object-cover" alt="Python coding">
     <div class="relative z-20 text-center text-white px-4 w-full">
-        <h1 class="text-5xl md:text-7xl font-extrabold mb-4 opacity-0 transform translate-y-10" id="hero-title">
-            🐍 Domine Python
+        <h1 class="text-5xl md:text-7xl font-extrabold mb-4 opacity-0 transform translate-y-10 flex items-center justify-center gap-4" id="hero-title">
+            <i class="fab fa-python text-6xl md:text-7xl text-blue-400"></i>
+            <span>Domine Python</span>
         </h1>
         <p class="text-xl md:text-2xl text-gray-200 max-w-2xl mx-auto mb-8 opacity-0 transform translate-y-10" id="hero-text">
-            Curso completo para iniciantes com 5 módulos interativos, quizzes e certificado.
+            Curso completo para iniciantes com 5 módulos interativos e quizzes.
         </p>
         <div class="opacity-0 transform translate-y-10" id="hero-btn">
             <a href="{{ url_for('checkout') }}" class="inline-block bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold py-4 px-8 rounded-full text-lg transition-all transform hover:scale-105 shadow-xl">
-                Comprar agora por R$ 19,99
+                <i class="fab fa-python mr-2"></i> Comprar agora por R$ 19,99
             </a>
         </div>
     </div>
@@ -36,9 +37,9 @@
             <p class="text-gray-300">Teste seu conhecimento e acompanhe o progresso.</p>
         </div>
         <div class="glass-card rounded-xl p-6 text-center scroll-fade">
-            <i class="fas fa-trophy text-5xl text-blue-400 mb-4"></i>
-            <h3 class="text-xl font-bold text-white mb-2">Certificado</h3>
-            <p class="text-gray-300">Ao concluir todos os módulos, você recebe um certificado.</p>
+            <i class="fas fa-star text-5xl text-blue-400 mb-4"></i>
+            <h3 class="text-xl font-bold text-white mb-2">Acesso vitalício</h3>
+            <p class="text-gray-300">Pague uma vez e estude para sempre.</p>
         </div>
     </div>
 </section>
@@ -57,7 +58,7 @@
         </div>
         <div class="bg-gray-800/50 rounded-xl p-5 flex items-start space-x-4 scroll-fade">
             <i class="fas fa-check-circle text-green-400 text-2xl mt-1"></i>
-            <div><h3 class="text-xl font-semibold text-white">Condicionais (if/else)</h3><p class="text-gray-300">Controle de fluxo.</p></div>
+            <div><h3 class="text-xl font-semibold text-white">Condicionais</h3><p class="text-gray-300">if, elif, else.</p></div>
         </div>
         <div class="bg-gray-800/50 rounded-xl p-5 flex items-start space-x-4 scroll-fade">
             <i class="fas fa-check-circle text-green-400 text-2xl mt-1"></i>
@@ -78,7 +79,7 @@
 <section class="glass-card rounded-2xl p-8 mb-20 text-center scroll-scale">
     <i class="fas fa-quote-left text-4xl text-blue-400 mb-4"></i>
     <p class="text-xl text-gray-200 italic max-w-3xl mx-auto">"Nunca programei antes e em duas semanas já estou criando meus próprios scripts! Método prático e divertido."</p>
-    <p class="text-white font-bold mt-4">— Ana Silva, aluna aprovada</p>
+    <p class="text-white font-bold mt-4">— Felipe, aluno aprovado</p>
 </section>
 
 <!-- Call to Action -->
@@ -86,31 +87,18 @@
     <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">Comece sua jornada hoje mesmo!</h2>
     <p class="text-gray-300 mb-6 text-lg">Acesso vitalício por apenas R$ 19,99</p>
     <a href="{{ url_for('checkout') }}" class="inline-block bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-bold py-4 px-10 rounded-full text-xl transition-all transform hover:scale-105 shadow-xl">
-        Quero aprender Python! 🚀
+        <i class="fab fa-python mr-2"></i> Quero aprender Python! 🚀
     </a>
 </section>
 
 <script>
-    // Inicializa GSAP e ScrollTrigger
     gsap.registerPlugin(ScrollTrigger);
-    
-    // Animação do Hero ao carregar
     gsap.to("#hero-title", { duration: 0.8, opacity: 1, y: 0, delay: 0.2, ease: "power2.out" });
     gsap.to("#hero-text", { duration: 0.8, opacity: 1, y: 0, delay: 0.4, ease: "power2.out" });
     gsap.to("#hero-btn", { duration: 0.8, opacity: 1, y: 0, delay: 0.6, ease: "power2.out" });
-    
-    // Animações de scroll para elementos com classe .scroll-fade
     gsap.utils.toArray(".scroll-fade").forEach((el) => {
-        gsap.fromTo(el, 
-            { opacity: 0, y: 50 },
-            { opacity: 1, y: 0, duration: 0.8, scrollTrigger: { trigger: el, start: "top 85%", toggleActions: "play none none reverse" } }
-        );
+        gsap.fromTo(el, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.8, scrollTrigger: { trigger: el, start: "top 85%", toggleActions: "play none none reverse" } });
     });
-    
-    // Efeito de escala no depoimento
-    gsap.fromTo(".scroll-scale", 
-        { opacity: 0, scale: 0.9 },
-        { opacity: 1, scale: 1, duration: 0.8, scrollTrigger: { trigger: ".scroll-scale", start: "top 85%" } }
-    );
+    gsap.fromTo(".scroll-scale", { opacity: 0, scale: 0.9 }, { opacity: 1, scale: 1, duration: 0.8, scrollTrigger: { trigger: ".scroll-scale", start: "top 85%" } });
 </script>
 {% endblock %}

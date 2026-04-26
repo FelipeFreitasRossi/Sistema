@@ -4,7 +4,6 @@ from models import db, Usuario, Transacao
 import re
 import json
 import traceback
-import mercadopago
 from dotenv import load_dotenv
 import os
 
@@ -17,14 +16,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///usuarios.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
-TOKEN = os.getenv('MERCADOPAGO_ACCESS_TOKEN')
-if TOKEN:
-    sdk = mercadopago.SDK(TOKEN)
-    print("✅ SDK Mercado Pago inicializado")
-else:
-    sdk = None
-    print("⚠️ Token não encontrado")
-
 with app.app_context():
     db.create_all()
 
@@ -34,7 +25,7 @@ def load_modules():
 
 MODULES = load_modules()
 
-# ---------- Funções de validação ----------
+# ---------- Funções auxiliares ----------
 def validar_cpf(cpf):
     cpf = re.sub(r'\D', '', cpf)
     if len(cpf) != 11 or cpf == cpf[0] * 11:
@@ -83,7 +74,7 @@ def cadastrar():
         if not validar_cpf(cpf):
             return jsonify({'success': False, 'message': 'CPF inválido.'})
         if len(senha) < 6:
-            return jsonify({'success': False, 'message': 'Senha deve ter pelo menos 6 caracteres.'})
+            return jsonify({'success': False, 'message': 'Senha muito curta.'})
 
         nascimento = datetime.strptime(data_nasc_str, '%Y-%m-%d').date()
         idade = calcular_idade(nascimento)
@@ -107,40 +98,19 @@ def cadastrar():
         session['user'] = novo.nome
         session['user_id'] = novo.id
 
-        # Gera QR Code PIX com valor FIXO (19.99)
-        if sdk:
-            try:
-                preference_data = {
-                    "items": [{
-                        "title": "Curso PythonLab - Acesso Vitalício",
-                        "quantity": 1,
-                        "currency_id": "BRL",
-                        "unit_price": 19.99  # VALOR FIXO
-                    }],
-                    "payer": {"email": email, "name": nome},
-                    "external_reference": str(novo.id),
-                    "payment_methods": {"installments": 1},
-                    "expires": True,
-                    "expiration_date_to": (datetime.now().replace(minute=datetime.now().minute + 30)).isoformat()
-                }
-                result = sdk.preference().create(preference_data)
-                if result["status"] == 201:
-                    pref = result["response"]
-                    qr_code_base64 = pref["point_of_interaction"]["transaction_data"]["qr_code_base64"]
-                    qr_code = pref["point_of_interaction"]["transaction_data"]["qr_code"]
-                    transacao = Transacao(
-                        user_id=novo.id,
-                        preference_id=pref["id"],
-                        status='pending',
-                        qr_code=qr_code,
-                        qr_code_base64=qr_code_base64,
-                        valor=19.99
-                    )
-                    db.session.add(transacao)
-                    db.session.commit()
-            except Exception as e:
-                print("Erro ao criar preferência:", e)
-                # Fallback: cria transação sem QR (será tratado na página de pagamento)
+        # Cria uma transação pendente com QR Code mock para não quebrar
+        qr_mock = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+        transacao = Transacao(
+            user_id=novo.id,
+            preference_id=f"mock_{novo.id}_{int(datetime.now().timestamp())}",
+            status='pending',
+            qr_code="MOCK_QR_CODE",
+            qr_code_base64=qr_mock,
+            valor=19.99
+        )
+        db.session.add(transacao)
+        db.session.commit()
+
         return jsonify({'success': True, 'redirect': '/pagamento'})
     except Exception as e:
         print(traceback.format_exc())
@@ -148,18 +118,39 @@ def cadastrar():
 
 @app.route('/logar', methods=['POST'])
 def logar():
-    data = request.get_json()
-    email = data.get('email')
-    senha = data.get('senha')
-    usuario = Usuario.query.filter_by(email=email).first()
-    if not usuario or not usuario.verificar_senha(senha):
-        return jsonify({'success': False, 'message': 'E-mail ou senha inválidos'})
-    session['user'] = usuario.nome
-    session['user_id'] = usuario.id
-    if usuario.payment_status == 'approved':
-        return jsonify({'success': True, 'redirect': '/dashboard'})
-    else:
-        return jsonify({'success': True, 'redirect': '/pagamento'})
+    try:
+        data = request.get_json()
+        email = data.get('email', '').strip()
+        senha = data.get('senha', '')
+        usuario = Usuario.query.filter_by(email=email).first()
+        if not usuario or not usuario.verificar_senha(senha):
+            return jsonify({'success': False, 'message': 'E-mail ou senha inválidos.'})
+
+        session['user'] = usuario.nome
+        session['user_id'] = usuario.id
+
+        # Verifica se o usuário tem transação ativa; se não, cria uma mock
+        transacao = Transacao.query.filter_by(user_id=usuario.id, status='pending').first()
+        if not transacao:
+            qr_mock = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+            transacao = Transacao(
+                user_id=usuario.id,
+                preference_id=f"mock_{usuario.id}_{int(datetime.now().timestamp())}",
+                status='pending',
+                qr_code="MOCK_QR_CODE",
+                qr_code_base64=qr_mock,
+                valor=19.99
+            )
+            db.session.add(transacao)
+            db.session.commit()
+
+        if usuario.payment_status == 'approved':
+            return jsonify({'success': True, 'redirect': '/dashboard'})
+        else:
+            return jsonify({'success': True, 'redirect': '/pagamento'})
+    except Exception as e:
+        print(traceback.format_exc())
+        return jsonify({'success': False, 'message': 'Erro interno.'}), 500
 
 @app.route('/pagamento')
 def pagamento():
@@ -167,18 +158,31 @@ def pagamento():
         return redirect(url_for('checkout'))
     user_id = session['user_id']
     usuario = Usuario.query.get(user_id)
+    if not usuario:
+        session.clear()
+        return redirect(url_for('checkout'))
+
     if usuario.payment_status == 'approved':
         return redirect(url_for('dashboard'))
-    
+
     transacao = Transacao.query.filter_by(user_id=user_id, status='pending').first()
-    if not transacao or not transacao.qr_code_base64:
-        # Tenta criar novamente (fallback)
-        # Redireciona para checkout para recriar a transação
-        return redirect(url_for('checkout'))
-    
-    return render_template('pagamento.html', 
-                           qr_code_base64=transacao.qr_code_base64, 
-                           preference_id=transacao.preference_id, 
+    if not transacao:
+        # Criar transação imediatamente
+        qr_mock = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+        transacao = Transacao(
+            user_id=user_id,
+            preference_id=f"mock_{user_id}_{int(datetime.now().timestamp())}",
+            status='pending',
+            qr_code="MOCK_QR_CODE",
+            qr_code_base64=qr_mock,
+            valor=19.99
+        )
+        db.session.add(transacao)
+        db.session.commit()
+
+    return render_template('pagamento.html',
+                           qr_code_base64=transacao.qr_code_base64,
+                           preference_id=transacao.preference_id,
                            user_name=usuario.nome,
                            valor=19.99)
 
@@ -186,67 +190,45 @@ def pagamento():
 def verificar_pagamento(preference_id):
     if 'user_id' not in session:
         return jsonify({'success': False, 'message': 'Não autenticado'})
+
     transacao = Transacao.query.filter_by(preference_id=preference_id).first()
-    if transacao and transacao.status == 'approved':
+    if not transacao:
+        return jsonify({'success': False, 'message': 'Transação não encontrada'})
+
+    if transacao.status == 'approved':
         return jsonify({'success': True, 'redirect': '/dashboard'})
-    
-    # Consulta API do Mercado Pago
-    if sdk:
-        try:
-            payment_result = sdk.payment().search(filters={"external_reference": str(transacao.user_id)})
-            for payment in payment_result["response"]["results"]:
-                if payment["status"] == "approved" and payment["transaction_amount"] == 19.99:
-                    transacao.status = 'approved'
-                    transacao.data_pagamento = datetime.utcnow()
-                    usuario = Usuario.query.get(transacao.user_id)
-                    usuario.payment_status = 'approved'
-                    db.session.commit()
-                    return jsonify({'success': True, 'redirect': '/dashboard'})
-        except Exception as e:
-            print("Erro na consulta:", e)
-    return jsonify({'success': False, 'message': 'Aguardando pagamento...'})
 
-@app.route('/webhook', methods=['POST'])
-def webhook():
-    """Recebe notificações do Mercado Pago e valida o valor"""
-    try:
-        data = request.get_json()
-        print("Webhook recebido:", data)
-        if data and data.get('type') == 'payment':
-            payment_id = data['data']['id']
-            if sdk:
-                payment_info = sdk.payment().get(payment_id)["response"]
-                if payment_info["status"] == "approved":
-                    # Verifica se o valor é exatamente 19.99
-                    if payment_info["transaction_amount"] != 19.99:
-                        print(f"Pagamento com valor incorreto: {payment_info['transaction_amount']}")
-                        return "Valor incorreto", 400
-                    external_ref = payment_info.get("external_reference")
-                    if external_ref:
-                        user_id = int(external_ref)
-                        usuario = Usuario.query.get(user_id)
-                        if usuario and usuario.payment_status != 'approved':
-                            usuario.payment_status = 'approved'
-                            transacao = Transacao.query.filter_by(user_id=user_id, status='pending').first()
-                            if transacao:
-                                transacao.status = 'approved'
-                                transacao.data_pagamento = datetime.utcnow()
-                            db.session.commit()
-                            print(f"✅ Acesso liberado para {usuario.nome}")
-        return "OK", 200
-    except Exception as e:
-        print(traceback.format_exc())
-        return "ERRO", 500
+    # Modo mock: aprova automaticamente
+    transacao.status = 'approved'
+    transacao.data_pagamento = datetime.utcnow()
+    usuario = Usuario.query.get(transacao.user_id)
+    if usuario:
+        usuario.payment_status = 'approved'
+    db.session.commit()
+    return jsonify({'success': True, 'redirect': '/dashboard'})
 
-# ---------- Rotas do Dashboard ----------
+# Rota para debug – listar usuários
+@app.route('/admin/usuarios')
+def listar_usuarios():
+    usuarios = Usuario.query.all()
+    return "<br>".join([f"ID: {u.id}, Nome: {u.nome}, Payment: {u.payment_status}" for u in usuarios])
+
 @app.route('/dashboard')
 def dashboard():
     if 'user_id' not in session:
         return redirect(url_for('checkout'))
-    usuario = Usuario.query.get(session['user_id'])
+
+    user_id = session['user_id']
+    usuario = Usuario.query.get(user_id)
+    if not usuario:
+        session.clear()
+        return redirect(url_for('checkout'))
+
+    # Verificação rigorosa
     if usuario.payment_status != 'approved':
         return redirect(url_for('pagamento'))
-    return render_template('dashboard.html', user=session['user'], modules=MODULES)
+
+    return render_template('dashboard.html', user=usuario.nome, modules=MODULES)
 
 @app.route('/api/modules')
 def api_modules():

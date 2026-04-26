@@ -3,8 +3,11 @@
 {% block content %}
 <div class="max-w-md mx-auto mt-16 glass-card rounded-2xl p-8 shadow-2xl animate-fade-in">
     <div class="text-center">
-        <i class="fas fa-shopping-cart text-5xl text-blue-400 mb-4"></i>
-        <h1 class="text-3xl font-bold gradient-text mb-2">Finalizar compra</h1>
+        <i class="fab fa-python text-6xl text-blue-400 mb-4"></i>
+        <h1 class="text-3xl font-bold gradient-text mb-2 flex items-center justify-center gap-2">
+            <i class="fab fa-python text-4xl"></i>
+            Finalizar compra
+        </h1>
         <p class="text-gray-300 mb-6">Preencha seus dados para acessar o curso</p>
         <div class="bg-blue-900/30 rounded-full p-2 w-20 h-20 mx-auto flex items-center justify-center">
             <i class="fas fa-tag text-3xl text-green-400"></i>
@@ -34,14 +37,13 @@
             <input type="password" id="senha" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white focus:ring-2 focus:ring-blue-500 transition" placeholder="Mínimo 6 caracteres">
         </div>
         <button id="btnCadastrar" class="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white font-bold py-3 rounded-xl transition-all transform hover:scale-105 shadow-lg flex items-center justify-center gap-2">
-            <i class="fas fa-credit-card"></i> Ir para pagamento
+            <i class="fab fa-python"></i> Ir para pagamento
         </button>
         <div id="errorMsg" class="text-red-400 text-sm text-center hidden"></div>
     </div>
 </div>
 
 <script>
-    // Máscara CPF
     document.getElementById('cpf').addEventListener('input', function(e) {
         let v = e.target.value.replace(/\D/g, '');
         if (v.length > 11) v = v.slice(0,11);
